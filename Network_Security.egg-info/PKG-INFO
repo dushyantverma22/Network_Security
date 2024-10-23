@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: Network-Security
+Version: 0.0.1
+Author: Dushyant
+Author-email: dushyantdchss@gmail.com
+Requires-Dist: python-dotenv
+Requires-Dist: pymango
+Requires-Dist: certifi
