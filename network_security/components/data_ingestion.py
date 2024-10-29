@@ -13,7 +13,20 @@ from sklearn.model_selection import train_test_split
 
 from dotenv import load_dotenv
 load_dotenv()
+from urllib.parse import quote_plus
 MONGO_DB_URL=os.getenv("MONGO_DB_URL")
+# Encode the username and password to escape special characters
+username = quote_plus("dushyantdchss")
+password = quote_plus("admin@1234")  # Uncomment this line if using password from code
+
+# Alternatively, you can load password from environment variables as well
+# password = quote_plus(os.getenv("MONGO_DB_PASSWORD"))
+
+# Retrieve MongoDB URL from environment variable
+MONGO_DB_URL = os.getenv("MONGO_DB_URL")
+
+# Construct URI with encoded username and password
+uri = f"mongodb+srv://{username}:{password}@cluster0.9ktju.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 class DataIngestion:
     def __init__(self, data_ingestion_config=DataIngestionConfig):
@@ -29,8 +42,14 @@ class DataIngestion:
         try:
             database_name=self.data_ingestion_config.database_name
             collection_name=self.data_ingestion_config.collection_name
-            self.mongo_client=pymongo.MongoClient(MONGO_DB_URL)
+            print(database_name)
+            print(collection_name)
+
+            self.mongo_client=pymongo.MongoClient(uri)
             collection=self.mongo_client[database_name][collection_name]
+            documents = list(collection.find())
+            print("Number of documents retrieved:", len(documents))
+            #df = pd.DataFrame(documents)
 
             df=pd.DataFrame(list(collection.find()))
             if "_id" in df.columns.to_list():
@@ -85,8 +104,9 @@ class DataIngestion:
         try:
             dataframe=self.export_collection_as_dataframe()
             dataframe=self.export_data_into_feature_store(dataframe)
+            print(dataframe.head())
             self.split_data_as_train_test(dataframe)
-            dataingestionartifact=DataIngestionArtifact(trained_file_path=self.data_ingestion_config.training_file_path,
+            dataingestionartifact=DataIngestionArtifact(train_file_path=self.data_ingestion_config.training_file_path,
                                                         test_file_path=self.data_ingestion_config.testing_file_path)
             return dataingestionartifact
 
